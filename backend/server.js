@@ -54,8 +54,12 @@ app.use((err, req, res, next) => {
     error: err.message || 'Server Error'
   });
 });
+app.get('/', (req, res) => {
+  res.send('AI News Summarizer API is running');
+});
 
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
