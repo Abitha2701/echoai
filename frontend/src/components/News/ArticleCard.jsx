@@ -4,12 +4,28 @@ import { Clock, Bookmark, BookmarkCheck, ArrowRight, Sparkles } from 'lucide-rea
 import { summaryAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
+import { usePreferences } from '../../context/PreferencesContext.jsx';
 
 const ArticleCard = ({ article }) => {
   const [isSaved, setIsSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const { isAuthenticated } = useAuth();
   const { addToast } = useToast();
+  const { preferences } = usePreferences();
+
+  const { showImages, compactView, readingMode } = preferences;
+  const imageHeightClass = compactView ? 'h-32' : 'h-48';
+  const contentPaddingClass = compactView ? 'p-4' : 'p-5';
+  const titleSizeClass = readingMode === 'compact'
+    ? 'text-base'
+    : readingMode === 'spacious'
+      ? 'text-xl'
+      : 'text-lg';
+  const descriptionSizeClass = readingMode === 'compact'
+    ? 'text-xs'
+    : readingMode === 'spacious'
+      ? 'text-base'
+      : 'text-sm';
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -78,58 +94,82 @@ const ArticleCard = ({ article }) => {
     <Link to={`/article/${article._id}`}>
       <div className="h-full bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden hover:scale-105 transform flex flex-col group border border-gray-100 dark:border-gray-700">
         {/* Article Image */}
-        <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600">
-          {article.imageUrl ? (
-            <img
-              src={article.imageUrl}
-              alt={article.title}
-              loading="lazy"
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-              onError={(e) => {
-                const key = (article.category || 'default').toLowerCase();
-                e.target.src = fallbackImages[key] || fallbackImages.default;
-              }}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-              <Sparkles className="h-12 w-12 text-blue-400 opacity-70" />
+        {showImages && (
+          <div className={`relative ${imageHeightClass} overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600`}>
+            {article.imageUrl ? (
+              <img
+                src={article.imageUrl}
+                alt={article.title}
+                loading="lazy"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                onError={(e) => {
+                  const key = (article.category || 'default').toLowerCase();
+                  e.target.src = fallbackImages[key] || fallbackImages.default;
+                }}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+                <Sparkles className="h-12 w-12 text-blue-400 opacity-70" />
+              </div>
+            )}
+
+            {/* Category Badge */}
+            <div className="absolute top-4 left-4">
+              <span className={`inline-block px-3 py-1.5 rounded-full text-xs font-bold ${categoryColor} backdrop-blur-sm shadow-lg transform group-hover:scale-110 transition-transform`}>
+                {article.category}
+              </span>
             </div>
-          )}
 
-          {/* Category Badge */}
-          <div className="absolute top-4 left-4">
-            <span className={`inline-block px-3 py-1.5 rounded-full text-xs font-bold ${categoryColor} backdrop-blur-sm shadow-lg transform group-hover:scale-110 transition-transform`}>
-              {article.category}
-            </span>
+            {/* Save Button */}
+            {isAuthenticated && (
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="absolute top-4 right-4 p-2.5 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 group/btn hover:scale-110"
+              >
+                {saving ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
+                ) : isSaved ? (
+                  <BookmarkCheck className="h-5 w-5 text-blue-600 animate-pulse-glow" />
+                ) : (
+                  <Bookmark className="h-5 w-5 text-gray-600 group-hover/btn:text-blue-600 transition-colors" />
+                )}
+              </button>
+            )}
           </div>
-
-          {/* Save Button */}
-          {isAuthenticated && (
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="absolute top-4 right-4 p-2.5 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 group/btn hover:scale-110"
-            >
-              {saving ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
-              ) : isSaved ? (
-                <BookmarkCheck className="h-5 w-5 text-blue-600 animate-pulse-glow" />
-              ) : (
-                <Bookmark className="h-5 w-5 text-gray-600 group-hover/btn:text-blue-600 transition-colors" />
-              )}
-            </button>
-          )}
-        </div>
+        )}
 
         {/* Content */}
-        <div className="p-5 flex-1 flex flex-col">
+        <div className={`${contentPaddingClass} flex-1 flex flex-col`}>
+          {!showImages && (
+            <div className="mb-3 flex items-center justify-between">
+              <span className={`inline-block px-3 py-1.5 rounded-full text-xs font-bold ${categoryColor} backdrop-blur-sm shadow-sm`}>
+                {article.category}
+              </span>
+              {isAuthenticated && (
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="p-2.5 bg-white rounded-full shadow hover:shadow-md transition-all duration-200 group/btn"
+                >
+                  {saving ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
+                  ) : isSaved ? (
+                    <BookmarkCheck className="h-5 w-5 text-blue-600 animate-pulse-glow" />
+                  ) : (
+                    <Bookmark className="h-5 w-5 text-gray-600 group-hover/btn:text-blue-600 transition-colors" />
+                  )}
+                </button>
+              )}
+            </div>
+          )}
           {/* Title */}
-          <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">
+          <h3 className={`${titleSizeClass} font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200`}>
             {article.title}
           </h3>
 
           {/* Description */}
-          <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-1">
+          <p className={`text-gray-600 ${descriptionSizeClass} mb-4 line-clamp-2 flex-1`}>
             {article.description}
           </p>
 

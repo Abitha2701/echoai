@@ -56,7 +56,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center py-6 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Soft background elements */}
       <div className="absolute top-[-5rem] left-[-6rem] w-[22rem] h-[22rem] bg-blue-200 rounded-full blur-3xl opacity-40"></div>
       <div className="absolute bottom-[-6rem] right-[-6rem] w-[24rem] h-[24rem] bg-blue-200 rounded-full blur-3xl opacity-40"></div>
@@ -66,7 +66,7 @@ const Register = () => {
         {/* Card */}
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl border border-slate-100">
           {/* Header */}
-          <div className="bg-blue-600 dark:bg-blue-700 px-8 py-10 relative overflow-hidden">
+          <div className="bg-blue-600 dark:bg-blue-700 px-8 py-6 relative overflow-hidden">
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full blur-2xl"></div>
             </div>
@@ -80,11 +80,11 @@ const Register = () => {
           </div>
 
           {/* Form Content */}
-          <div className="px-8 py-8 max-h-[calc(100vh-200px)] overflow-y-auto">
+          <div className="px-8 py-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-1">Create account</h2>
-            <p className="text-gray-600 text-sm mb-8">Get started with AI-powered news</p>
+            <p className="text-gray-600 text-sm mb-6">Get started with AI-powered news</p>
 
-            <form className="space-y-4" onSubmit={handleSubmit}>
+            <form className="space-y-3" onSubmit={handleSubmit}>
               {/* Error Alert */}
               {error && (
                 <div className="flex items-start space-x-3 bg-red-50 border border-red-200 rounded-xl p-4">
@@ -169,7 +169,7 @@ const Register = () => {
 
               {/* Password Strength Indicator */}
               {formData.password && (
-                <div className="space-y-2">
+                <div className="space-y-2 hidden sm:block">
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="flex items-center space-x-1">
                       {passwordStrength.length ? (
@@ -288,7 +288,7 @@ const Register = () => {
         </div>
 
         {/* Footer Text */}
-        <p className="text-center text-white text-sm mt-8 font-medium opacity-90">
+        <p className="text-center text-white text-sm mt-6 font-medium opacity-90">
           ✨ Privacy is our priority
         </p>
       </div>

@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { User, Mail, Calendar, BookOpen, Sparkles, Settings, LogOut, Bell, Moon, Sun, Zap, Eye, Globe } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext';
 import { useTheme } from '../../context/ThemeContext';
+import { usePreferences } from '../../context/PreferencesContext';
 
 const Profile = () => {
   const { user, logout } = useAuth();
@@ -11,27 +12,7 @@ const Profile = () => {
   const { addToast } = useToast();
   const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('profile');
-  
-  // Preferences state
-  const [preferences, setPreferences] = useState(() => {
-    const saved = localStorage.getItem('userPreferences');
-    return saved ? JSON.parse(saved) : {
-      emailNotifications: true,
-      dailyDigest: true,
-      breakingNews: false,
-      autoGenerateSummaries: true,
-      readingMode: 'comfortable',
-      articlesPerPage: 20,
-      autoPlayVideos: false,
-      showImages: true,
-      compactView: false,
-      language: 'en'
-    };
-  });
-
-  useEffect(() => {
-    localStorage.setItem('userPreferences', JSON.stringify(preferences));
-  }, [preferences]);
+  const { preferences, updatePreference } = usePreferences();
 
   const handleLogout = () => {
     logout();
@@ -40,7 +21,7 @@ const Profile = () => {
   };
 
   const handlePreferenceChange = (key, value) => {
-    setPreferences(prev => ({ ...prev, [key]: value }));
+    updatePreference(key, value);
     addToast('Preference updated', 'success');
   };
 

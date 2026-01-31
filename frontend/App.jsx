@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AuthProvider, useAuth } from "./src/context/AuthContext";
 import { ToastProvider } from "./src/context/ToastContext";
 import { ThemeProvider } from "./src/context/ThemeContext";
+import { PreferencesProvider } from "./src/context/PreferencesContext";
 
 import Layout from "./src/components/Layout/Layout";
 import Login from "./src/components/Auth/Login";
@@ -24,8 +25,9 @@ function App() {
     <ThemeProvider>
       <ToastProvider>
         <AuthProvider>
-          <Router>
-            <Routes>
+          <PreferencesProvider>
+            <Router>
+              <Routes>
               <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -119,14 +121,13 @@ function App() {
             />
           </Routes>
 
-          <ToastContainer />
-        </Router>
-      </AuthProvider>
-    </ToastProvider>
+              <ToastContainer />
+            </Router>
+          </PreferencesProvider>
+        </AuthProvider>
+      </ToastProvider>
     </ThemeProvider>
   );
-}
-
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
 
@@ -140,5 +141,5 @@ function ProtectedRoute({ children }) {
 
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 }
-
+}
 export default App;

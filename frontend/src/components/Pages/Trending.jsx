@@ -3,11 +3,14 @@ import { TrendingUp, Flame, Clock, ArrowUp } from 'lucide-react';
 import { newsAPI } from '../../services/api';
 import ArticleCard from '../News/ArticleCard';
 import ArticleSkeleton from '../News/ArticleSkeleton';
+import { usePreferences } from '../../context/PreferencesContext';
 
 const Trending = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState('today');
+  const { preferences } = usePreferences();
+  const { articlesPerPage, compactView } = preferences;
 
   const timeFilters = [
     { id: 'today', label: 'Today', icon: Clock },
@@ -80,15 +83,15 @@ const Trending = () => {
 
   useEffect(() => {
     fetchTrendingNews();
-  }, [timeFilter]);
+  }, [timeFilter, articlesPerPage]);
 
   const fetchTrendingNews = async () => {
     setLoading(true);
     try {
-      const response = await newsAPI.getNews();
-      const sortedArticles = (response.data.data || [])
+      const response = await newsAPI.getNews(1, Math.max(articlesPerPage, 12));
+      const sortedArticles = (response.data || [])
         .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
-        .slice(0, 12);
+        .slice(0, Math.max(articlesPerPage, 12));
       setArticles(sortedArticles.length > 0 ? sortedArticles : fallbackArticles);
     } catch (error) {
       console.error('Error fetching trending news:', error);
@@ -149,7 +152,7 @@ const Trending = () => {
         {loading ? (
           <div>
             <h2 className="text-2xl font-bold text-slate-900 mb-6">Loading trending articles...</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className={`grid grid-cols-1 md:grid-cols-2 ${compactView ? 'lg:grid-cols-4 xl:grid-cols-5' : 'lg:grid-cols-3'} gap-6`}>
               {[...Array(9)].map((_, i) => (
                 <ArticleSkeleton key={i} />
               ))}
@@ -161,7 +164,7 @@ const Trending = () => {
               <TrendingUp className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               More Trending Stories
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className={`grid grid-cols-1 md:grid-cols-2 ${compactView ? 'lg:grid-cols-4 xl:grid-cols-5' : 'lg:grid-cols-3'} gap-6`}>
               {articles.slice(1).map((article, index) => (
                 <div key={article._id} className="relative">
                   <div className="absolute -top-3 -left-3 bg-gradient-to-r from-orange-400 to-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-lg z-10">

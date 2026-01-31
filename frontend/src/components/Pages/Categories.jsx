@@ -8,11 +8,14 @@ import {
 import { newsAPI } from '../../services/api';
 import ArticleCard from '../News/ArticleCard';
 import ArticleSkeleton from '../News/ArticleSkeleton';
+import { usePreferences } from '../../context/PreferencesContext';
 
 const Categories = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { preferences } = usePreferences();
+  const { articlesPerPage, compactView } = preferences;
 
   const categories = [
     { id: 'technology', name: 'Technology', icon: Cpu, color: 'blue', description: 'Tech innovations & startups' },
@@ -119,8 +122,8 @@ const Categories = () => {
   const fetchCategoryNews = async (categoryId) => {
     setLoading(true);
     try {
-      const response = await newsAPI.getNewsByCategory(categoryId);
-      const results = response.data.data || [];
+      const response = await newsAPI.getNewsByCategory(categoryId, 1, articlesPerPage);
+      const results = response.data || [];
       const fallback = fallbackArticlesByCategory[categoryId] || fallbackArticlesByCategory.technology;
       setArticles(results.length > 0 ? results : fallback);
     } catch (error) {
@@ -136,7 +139,7 @@ const Categories = () => {
     if (selectedCategory) {
       fetchCategoryNews(selectedCategory);
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, articlesPerPage]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8 transition-colors duration-200 text-slate-900 dark:text-white">
@@ -198,13 +201,13 @@ const Categories = () => {
 
             {/* Articles Grid */}
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className={`grid grid-cols-1 md:grid-cols-2 ${compactView ? 'lg:grid-cols-4 xl:grid-cols-5' : 'lg:grid-cols-3'} gap-6`}>
                 {[...Array(6)].map((_, i) => (
                   <ArticleSkeleton key={i} />
                 ))}
               </div>
             ) : articles.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className={`grid grid-cols-1 md:grid-cols-2 ${compactView ? 'lg:grid-cols-4 xl:grid-cols-5' : 'lg:grid-cols-3'} gap-6`}>
                 {articles.map((article) => (
                   <ArticleCard key={article._id} article={article} />
                 ))}

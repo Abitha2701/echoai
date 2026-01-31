@@ -4,6 +4,7 @@ import { newsAPI } from '../../services/api';
 import ArticleCard from '../News/ArticleCard';
 import ArticleSkeleton from '../News/ArticleSkeleton';
 import { useToast } from '../../context/ToastContext';
+import { usePreferences } from '../../context/PreferencesContext';
 
 const Search = () => {
   const [query, setQuery] = useState('');
@@ -11,6 +12,8 @@ const Search = () => {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const { addToast } = useToast();
+  const { preferences } = usePreferences();
+  const { articlesPerPage, compactView } = preferences;
 
   const trendingTopics = [
     'Artificial Intelligence',
@@ -102,8 +105,8 @@ const Search = () => {
     setLoading(true);
     setHasSearched(true);
     try {
-      const response = await newsAPI.searchNews(query);
-      const results = response.data.data || [];
+      const response = await newsAPI.searchNews(query, 1, articlesPerPage);
+      const results = response.data || [];
       setArticles(results.length > 0 ? results : getFallbackResults(query));
     } catch (error) {
       console.error('Error searching:', error);
@@ -117,9 +120,9 @@ const Search = () => {
     setQuery(topic);
     setLoading(true);
     setHasSearched(true);
-    newsAPI.searchNews(topic)
+    newsAPI.searchNews(topic, 1, articlesPerPage)
       .then(response => {
-        const results = response.data.data || [];
+        const results = response.data || [];
         setArticles(results.length > 0 ? results : getFallbackResults(topic));
       })
       .catch(error => {
@@ -200,7 +203,7 @@ const Search = () => {
         {loading ? (
           <div>
             <h2 className="text-2xl font-bold text-slate-900 mb-6">Searching...</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className={`grid grid-cols-1 md:grid-cols-2 ${compactView ? 'lg:grid-cols-4 xl:grid-cols-5' : 'lg:grid-cols-3'} gap-6`}>
               {[...Array(6)].map((_, i) => (
                 <ArticleSkeleton key={i} />
               ))}
@@ -218,7 +221,7 @@ const Search = () => {
             </div>
             
             {articles.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className={`grid grid-cols-1 md:grid-cols-2 ${compactView ? 'lg:grid-cols-4 xl:grid-cols-5' : 'lg:grid-cols-3'} gap-6`}>
                 {articles.map((article) => (
                   <ArticleCard key={article._id} article={article} />
                 ))}

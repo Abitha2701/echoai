@@ -3,6 +3,7 @@ import { newsAPI } from '../../services/api';
 import ArticleCard from './ArticleCard';
 import ArticleSkeleton from './ArticleSkeleton';
 import { Search, Sparkles, TrendingUp, AlertCircle, Loader } from 'lucide-react';
+import { usePreferences } from '../../context/PreferencesContext';
 
 const NewsFeed = () => {
   const [articles, setArticles] = useState([]);
@@ -13,6 +14,8 @@ const NewsFeed = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [showTop, setShowTop] = useState(false);
+  const { preferences } = usePreferences();
+  const { articlesPerPage, compactView } = preferences;
 
   const categories = [
     { id: 'all', label: 'All', icon: '📰' },
@@ -93,11 +96,11 @@ const NewsFeed = () => {
       let response;
 
       if (query) {
-        response = await newsAPI.searchNews(query, pageNum);
+        response = await newsAPI.searchNews(query, pageNum, articlesPerPage);
       } else if (category !== 'all') {
-        response = await newsAPI.getNewsByCategory(category, pageNum);
+        response = await newsAPI.getNewsByCategory(category, pageNum, articlesPerPage);
       } else {
-        response = await newsAPI.getNews(pageNum);
+        response = await newsAPI.getNews(pageNum, articlesPerPage);
       }
 
       const results = response.data || [];
@@ -109,7 +112,7 @@ const NewsFeed = () => {
         setArticles(prev => [...prev, ...articlesToShow]);
       }
 
-      setHasMore(results.length === 20);
+      setHasMore(results.length === articlesPerPage);
       setError('');
     } catch (err) {
       console.error('Error fetching news:', err);
@@ -125,7 +128,7 @@ const NewsFeed = () => {
   useEffect(() => {
     fetchNews(1, selectedCategory, searchQuery);
     setPage(1);
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, articlesPerPage]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -248,7 +251,7 @@ const NewsFeed = () => {
         {/* Loading State */}
         {loading && articles.length === 0 && (
           <div className="mb-12">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className={`grid grid-cols-1 md:grid-cols-2 ${compactView ? 'lg:grid-cols-4 xl:grid-cols-5' : 'lg:grid-cols-3'} gap-8`}>
               {Array.from({ length: 6 }).map((_, idx) => (
                 <ArticleSkeleton key={idx} />
               ))}
@@ -259,7 +262,7 @@ const NewsFeed = () => {
         {/* News Grid */}
         {articles.length > 0 && (
           <div className="mb-12">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className={`grid grid-cols-1 md:grid-cols-2 ${compactView ? 'lg:grid-cols-4 xl:grid-cols-5' : 'lg:grid-cols-3'} gap-8`}>
               {articles.map((article, index) => (
                 <div key={article._id} style={{animationDelay: `${index * 0.05}s`}} className="animate-fadeInUp">
                   <ArticleCard article={article} />

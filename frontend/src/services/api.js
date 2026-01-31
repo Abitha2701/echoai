@@ -85,13 +85,13 @@ export const newsAPI = {
     return response.data;
   },
 
-  getNewsByCategory: async (category, page = 1) => {
-    const response = await api.get(`/news/category/${category}`, { params: { page } });
+  getNewsByCategory: async (category, page = 1, limit = 20) => {
+    const response = await api.get(`/news/category/${category}`, { params: { page, limit } });
     return response.data;
   },
 
-  searchNews: async (query, page = 1) => {
-    const response = await api.get('/news/search', { params: { q: query, page } });
+  searchNews: async (query, page = 1, limit = 20) => {
+    const response = await api.get('/news/search', { params: { q: query, page, limit } });
     return response.data;
   },
 

@@ -2,12 +2,22 @@ import { useState, useEffect } from 'react';
 import { summaryAPI } from '../../services/api';
 import { Link } from 'react-router-dom';
 import { Trash2, ExternalLink, Clock, Bookmark, AlertCircle, Loader, Sparkles, ArrowRight } from 'lucide-react';
+import { usePreferences } from '../../context/PreferencesContext';
 
 const SavedSummaries = () => {
   const [summaries, setSummaries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deletingId, setDeletingId] = useState(null);
+  const { preferences } = usePreferences();
+  const { showImages, compactView, readingMode } = preferences;
+
+  const summaryPaddingClass = compactView ? 'p-4' : 'p-6';
+  const summaryTextClass = readingMode === 'compact'
+    ? 'text-xs'
+    : readingMode === 'spacious'
+      ? 'text-base'
+      : 'text-sm';
 
   const fallbackSummaries = [
     {
@@ -185,7 +195,7 @@ const SavedSummaries = () => {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className={`grid grid-cols-1 md:grid-cols-2 ${compactView ? 'lg:grid-cols-4 xl:grid-cols-5' : 'lg:grid-cols-3'} gap-8`}>
             {summaries.map((savedSummary, index) => {
               const categoryColor = categoryColors[savedSummary.article.category?.toLowerCase()] || categoryColors.default;
               
@@ -196,46 +206,67 @@ const SavedSummaries = () => {
                   className="group bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden h-full flex flex-col border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-600 animate-fadeInUp"
                 >
                   {/* Article Image */}
-                  <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300">
-                    {savedSummary.article.imageUrl ? (
-                      <img
-                        src={savedSummary.article.imageUrl}
-                        alt={savedSummary.article.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-                        <Sparkles className="h-12 w-12 text-blue-400 opacity-70" />
-                      </div>
-                    )}
-
-                    {/* Category Badge */}
-                    <div className="absolute top-4 left-4">
-                      <span className={`inline-block px-3 py-1.5 rounded-full text-xs font-bold ${categoryColor} backdrop-blur-sm shadow-lg`}>
-                        {savedSummary.article.category}
-                      </span>
-                    </div>
-
-                    {/* Delete Button */}
-                    <button
-                      onClick={() => handleDelete(savedSummary.article._id)}
-                      disabled={deletingId === savedSummary.article._id}
-                      className="absolute top-4 right-4 p-2.5 bg-white rounded-full shadow-lg hover:shadow-xl hover:bg-red-50 text-red-600 hover:text-red-700 transition-all duration-200 disabled:opacity-50 group-hover:scale-110 transform"
-                      title="Remove from saved"
-                    >
-                      {deletingId === savedSummary.article._id ? (
-                        <Loader className="h-5 w-5 animate-spin" />
+                  {showImages && (
+                    <div className={`relative ${compactView ? 'h-32' : 'h-48'} overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300`}>
+                      {savedSummary.article.imageUrl ? (
+                        <img
+                          src={savedSummary.article.imageUrl}
+                          alt={savedSummary.article.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
                       ) : (
-                        <Trash2 className="h-5 w-5" />
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+                          <Sparkles className="h-12 w-12 text-blue-400 opacity-70" />
+                        </div>
                       )}
-                    </button>
-                  </div>
+
+                      {/* Category Badge */}
+                      <div className="absolute top-4 left-4">
+                        <span className={`inline-block px-3 py-1.5 rounded-full text-xs font-bold ${categoryColor} backdrop-blur-sm shadow-lg`}>
+                          {savedSummary.article.category}
+                        </span>
+                      </div>
+
+                      {/* Delete Button */}
+                      <button
+                        onClick={() => handleDelete(savedSummary.article._id)}
+                        disabled={deletingId === savedSummary.article._id}
+                        className="absolute top-4 right-4 p-2.5 bg-white rounded-full shadow-lg hover:shadow-xl hover:bg-red-50 text-red-600 hover:text-red-700 transition-all duration-200 disabled:opacity-50 group-hover:scale-110 transform"
+                        title="Remove from saved"
+                      >
+                        {deletingId === savedSummary.article._id ? (
+                          <Loader className="h-5 w-5 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+                  )}
 
                   {/* Content */}
-                  <div className="p-6 flex-1 flex flex-col">
+                  <div className={`${summaryPaddingClass} flex-1 flex flex-col`}>
+                    {!showImages && (
+                      <div className="mb-4 flex items-center justify-between">
+                        <span className={`inline-block px-3 py-1.5 rounded-full text-xs font-bold ${categoryColor} backdrop-blur-sm shadow-sm`}>
+                          {savedSummary.article.category}
+                        </span>
+                        <button
+                          onClick={() => handleDelete(savedSummary.article._id)}
+                          disabled={deletingId === savedSummary.article._id}
+                          className="p-2.5 bg-white rounded-full shadow hover:shadow-md hover:bg-red-50 text-red-600 hover:text-red-700 transition-all duration-200 disabled:opacity-50"
+                          title="Remove from saved"
+                        >
+                          {deletingId === savedSummary.article._id ? (
+                            <Loader className="h-5 w-5 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-5 w-5" />
+                          )}
+                        </button>
+                      </div>
+                    )}
                     {/* Title */}
                     <Link
                       to={`/article/${savedSummary.article._id}`}
@@ -250,7 +281,7 @@ const SavedSummaries = () => {
                         <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5 animate-pulse" />
                         <p className="text-xs font-bold text-gray-700 dark:text-gray-300">AI Summary</p>
                       </div>
-                      <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3 font-medium">
+                      <p className={`${summaryTextClass} text-gray-700 dark:text-gray-300 line-clamp-3 font-medium`}>
                         {savedSummary.summary || savedSummary.article.aiSummary}
                       </p>
                     </div>
