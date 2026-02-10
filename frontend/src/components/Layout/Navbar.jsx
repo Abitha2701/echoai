@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { Menu, X, User, LogOut, Newspaper, Bookmark, Search, Home, TrendingUp, Layers, Info } from 'lucide-react';
+import { Menu, X, User, LogOut, Newspaper, Bookmark, Search, Home, TrendingUp, Layers, Info, FileUp } from 'lucide-react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -64,6 +64,13 @@ const Navbar = () => {
                 >
                   <Search className="h-4 w-4 group-hover:scale-110 transition-transform" />
                   <span>Search</span>
+                </Link>
+                <Link
+                  to="/upload"
+                  className="flex items-center space-x-1 text-white hover:bg-white/25 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 group"
+                >
+                  <FileUp className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                  <span>Upload</span>
                 </Link>
                 <Link
                   to="/saved"
@@ -179,6 +186,14 @@ const Navbar = () => {
                 >
                   <Search className="h-5 w-5" />
                   <span>Search</span>
+                </Link>
+                <Link
+                  to="/upload"
+                  onClick={closeMenu}
+                  className="flex items-center space-x-2 text-white hover:bg-blue-600 block px-3 py-2 rounded-xl text-base font-medium transition-all duration-200"
+                >
+                  <FileUp className="h-5 w-5" />
+                  <span>Upload</span>
                 </Link>
                 <Link
                   to="/saved"

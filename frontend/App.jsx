@@ -18,6 +18,7 @@ import Categories from "./src/components/Pages/Categories";
 import Search from "./src/components/Pages/Search";
 import Profile from "./src/components/Pages/Profile";
 import Trending from "./src/components/Pages/Trending";
+import UploadSummary from "./src/components/Pages/UploadSummary";
 
 
 function App() {
@@ -93,6 +94,17 @@ function App() {
                 <ProtectedRoute>
                   <Layout>
                     <Search />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/upload"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <UploadSummary />
                   </Layout>
                 </ProtectedRoute>
               }
