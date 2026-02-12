@@ -169,7 +169,7 @@ const ReaderDashboard = () => {
                 Reader Dashboard
               </div>
               <h1 className="text-4xl md:text-5xl font-bold mt-4 leading-tight">
-                Welcome back, {user?.name?.split(' ')[0] || 'reader'}.
+                Welcome {user?.name?.split(' ')[0] || 'reader'}.
               </h1>
               <p className="text-lg text-slate-600 mt-3">{todayLabel} · Your feed is ready.</p>
             </div>
