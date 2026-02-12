@@ -1,172 +1,203 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
-import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, Newspaper } from 'lucide-react';
+import './AuthSplit.css';
 
 const Login = () => {
+  const [mode, setMode] = useState('login');
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const { login } = useAuth();
+  const { login, register } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value
-    });
+    }));
+    if (error) setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
-    const result = await login(formData.email, formData.password);
+    if (mode === 'signup' && formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match.');
+      setLoading(false);
+      return;
+    }
+
+    const result = mode === 'login'
+      ? await login(formData.email, formData.password)
+      : await register(formData.name, formData.email, formData.password);
 
     if (result.success) {
-      addToast('Login successful!', 'success');
+      addToast(mode === 'login' ? 'Login successful!' : 'Account created!', 'success');
       navigate('/dashboard');
     } else {
-      addToast(result.error, 'error');
+      const message = result.error || 'Something went wrong. Please try again.';
+      setError(message);
+      addToast(message, 'error');
     }
 
     setLoading(false);
   };
 
-  return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Soft background elements */}
-      <div className="absolute top-[-5rem] left-[-6rem] w-[22rem] h-[22rem] bg-blue-200 rounded-full blur-3xl opacity-40"></div>
-      <div className="absolute bottom-[-6rem] right-[-6rem] w-[24rem] h-[24rem] bg-blue-200 rounded-full blur-3xl opacity-40"></div>
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[14rem] h-[14rem] bg-blue-100 rounded-full blur-3xl opacity-30"></div>
+  const isLogin = mode === 'login';
 
-      <div className="relative max-w-md w-full animate-fadeInUp">
-        {/* Card */}
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl border border-slate-100">
-          {/* Header */}
-          <div className="bg-blue-600 dark:bg-blue-700 px-8 py-10 relative overflow-hidden">
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full blur-2xl"></div>
-            </div>
-            <div className="relative flex items-center justify-center space-x-3 mb-3">
-              <div className="bg-white/20 p-2.5 rounded-xl backdrop-blur-md">
-                <Newspaper className="h-7 w-7 text-white" />
-              </div>
-              <h1 className="text-3xl font-bold text-white">ECHO AI</h1>
-            </div>
-            <p className="text-blue-100 text-center text-sm font-medium">Your AI-powered news companion</p>
+  return (
+    <div className="auth-page">
+      <section className="auth-visual" aria-hidden="true">
+        <div className="auth-visual-content">
+          <h1>Summarize News in Seconds</h1>
+          <p className="auth-visual-subtext">
+            Paste any news article and get a clear, concise summary instantly.
+          </p>
+        </div>
+      </section>
+
+      <section className="auth-form">
+        <div className="auth-form-inner">
+          <div className="auth-toggle" role="tablist" aria-label="Authentication mode">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={isLogin}
+              className={isLogin ? 'auth-toggle-btn active' : 'auth-toggle-btn'}
+              onClick={() => setMode('login')}
+            >
+              Login
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={!isLogin}
+              className={!isLogin ? 'auth-toggle-btn active' : 'auth-toggle-btn'}
+              onClick={() => setMode('signup')}
+            >
+              Signup
+            </button>
           </div>
 
-          {/* Form Content */}
-          <div className="px-8 py-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">Welcome back</h2>
-            <p className="text-gray-600 text-sm mb-8">Sign in to your account to continue</p>
+          <div className="auth-header">
+            <h2>{isLogin ? 'Welcome back' : 'Create your account'}</h2>
+            <p>
+              {isLogin
+                ? 'Log in to access your latest summaries.'
+                : 'Start summarizing the news with a fresh account.'}
+            </p>
+          </div>
 
-            <form className="space-y-5" onSubmit={handleSubmit}>
-              {/* Email Field */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <div className="relative group">
-                  <Mail className="absolute left-4 top-3.5 h-5 w-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200 text-gray-900 placeholder:text-gray-400"
-                    placeholder="you@example.com"
-                    value={formData.email}
-                    onChange={handleChange}
-                  />
-                </div>
+          <form className="auth-fields" onSubmit={handleSubmit}>
+            {!isLogin && (
+              <label className="auth-field">
+                <span>Name</span>
+                <input
+                  type="text"
+                  name="name"
+                  autoComplete="name"
+                  placeholder="Jamie Rivera"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                />
+              </label>
+            )}
+
+            <label className="auth-field">
+              <span>Email</span>
+              <input
+                type="email"
+                name="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </label>
+
+            <label className="auth-field">
+              <span>Password</span>
+              <div className="auth-password">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  autoComplete={isLogin ? 'current-password' : 'new-password'}
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+                <button
+                  type="button"
+                  className="auth-password-toggle"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
+            </label>
 
-              {/* Password Field */}
-              <div>
-                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Password
-                </label>
-                <div className="relative group">
-                  <Lock className="absolute left-4 top-3.5 h-5 w-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
+            {!isLogin && (
+              <label className="auth-field">
+                <span>Confirm Password</span>
+                <div className="auth-password">
                   <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    required
-                    className="w-full pl-11 pr-11 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200 text-gray-900 placeholder:text-gray-400"
-                    placeholder="••••••••"
-                    value={formData.password}
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    name="confirmPassword"
+                    autoComplete="new-password"
+                    placeholder="Re-enter your password"
+                    value={formData.confirmPassword}
                     onChange={handleChange}
+                    required
                   />
                   <button
                     type="button"
-                    className="absolute right-4 top-3.5 text-gray-400 hover:text-gray-600 transition-colors"
-                    onClick={() => setShowPassword(!showPassword)}
+                    className="auth-password-toggle"
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-              </div>
+              </label>
+            )}
 
-              {/* Sign In Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Signing in...
-                  </span>
-                ) : (
-                  'Sign in'
-                )}
-              </button>
+            {error && <p className="auth-error" role="alert">{error}</p>}
 
-              {/* Divider */}
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500 font-medium">New to ECHO AI?</span>
-                </div>
-              </div>
+            <button type="submit" className="auth-submit" disabled={loading}>
+              {loading ? 'Please wait...' : isLogin ? 'Login' : 'Sign up'}
+            </button>
+          </form>
 
-              {/* Sign Up Link */}
-              <Link
-                to="/register"
-                className="w-full py-3 px-4 border-2 border-blue-200 text-blue-600 font-bold rounded-xl hover:bg-blue-50 hover:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center hover:shadow-lg"
-              >
-                Create an account
-              </Link>
-            </form>
-          </div>
+          <p className="auth-switch">
+            {isLogin ? "Don’t have an account?" : 'Already have an account?'}
+            <button
+              type="button"
+              className="auth-switch-btn"
+              onClick={() => setMode(isLogin ? 'signup' : 'login')}
+            >
+              {isLogin ? 'Sign up' : 'Login'}
+            </button>
+          </p>
         </div>
-
-        {/* Footer Text */}
-        <p className="text-center text-white text-sm mt-8 font-medium opacity-90 drop-shadow">
-          ✨ Stay updated with intelligent news summaries
-        </p>
-      </div>
+      </section>
     </div>
   );
 };

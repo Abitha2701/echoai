@@ -7,7 +7,6 @@ import { PreferencesProvider } from "./src/context/PreferencesContext";
 
 import Layout from "./src/components/Layout/Layout";
 import Login from "./src/components/Auth/Login";
-import Register from "./src/components/Auth/Register";
 import NewsFeed from "./src/components/News/NewsFeed";
 import ArticleDetail from "./src/components/News/ArticleDetail";
 import SavedSummaries from "./src/components/Summary/SavedSummaries";
@@ -31,7 +30,7 @@ function App() {
               <Routes>
               <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/register" element={<Login />} />
  
             <Route
               path="/dashboard"
