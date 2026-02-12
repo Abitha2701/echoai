@@ -7,6 +7,7 @@ import { PreferencesProvider } from "./src/context/PreferencesContext";
 
 import Layout from "./src/components/Layout/Layout";
 import Login from "./src/components/Auth/Login";
+import ResetPassword from "./src/components/Auth/ResetPassword";
 import NewsFeed from "./src/components/News/NewsFeed";
 import ArticleDetail from "./src/components/News/ArticleDetail";
 import SavedSummaries from "./src/components/Summary/SavedSummaries";
@@ -31,6 +32,7 @@ function App() {
               <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Login />} />
+            <Route path="/reset-password/:resetToken" element={<ResetPassword />} />
  
             <Route
               path="/dashboard"

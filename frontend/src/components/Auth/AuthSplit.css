@@ -177,6 +177,21 @@
   color: var(--auth-ink);
 }
 
+.auth-forgot-link {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: -6px 0 4px;
+  align-self: flex-start;
+  color: var(--auth-accent);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.auth-forgot-link:hover {
+  color: #0ea5e9;
+}
+
 .auth-field input:focus {
   outline: none;
   border-color: #38bdf8;
@@ -236,6 +251,20 @@
 
 .auth-switch-btn:hover {
   color: #0ea5e9;
+}
+
+.auth-back-link {
+  border: none;
+  background: none;
+  color: var(--auth-muted);
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+}
+
+.auth-back-link:hover {
+  color: var(--auth-ink);
 }
 
 @media (max-width: 960px) {
