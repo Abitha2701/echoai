@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, Flame, Clock, ArrowUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { TrendingUp, Flame, Clock, ArrowUp, ArrowRight } from 'lucide-react';
 import { newsAPI } from '../../services/api';
 import ArticleCard from '../News/ArticleCard';
 import ArticleSkeleton from '../News/ArticleSkeleton';
@@ -9,7 +10,8 @@ const Trending = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState('today');
-  const { preferences } = usePreferences();
+  const [error, setError] = useState('');
+  const { preferences } = usePreferences();                                  
   const { articlesPerPage, compactView } = preferences;
 
   const timeFilters = [
@@ -18,84 +20,23 @@ const Trending = () => {
     { id: 'month', label: 'This Month', icon: ArrowUp }
   ];
 
-  const fallbackArticles = [
-    {
-      _id: 'trending-1',
-      title: 'Breaking: Major AI Breakthrough Announced by Leading Tech Company',
-      description: 'Revolutionary AI model achieves unprecedented performance in multiple domains, setting new industry standards.',
-      imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1200&q=80',
-      category: 'technology',
-      source: { name: 'Tech News' },
-      publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      readTime: 5
-    },
-    {
-      _id: 'trending-2',
-      title: 'NASA Discovers Potentially Habitable Exoplanet',
-      description: 'New planet found in habitable zone shows promising signs of water and atmosphere.',
-      imageUrl: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=80',
-      category: 'science',
-      source: { name: 'Space Today' },
-      publishedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-      readTime: 6
-    },
-    {
-      _id: 'trending-3',
-      title: 'Global Markets Rally on Strong Economic Data',
-      description: 'Stock markets worldwide surge following positive economic indicators and corporate earnings.',
-      imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=80',
-      category: 'business',
-      source: { name: 'Financial Times' },
-      publishedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-      readTime: 4
-    },
-    {
-      _id: 'trending-4',
-      title: 'Revolutionary Cancer Treatment Shows Promising Results',
-      description: 'New immunotherapy approach demonstrates high success rate in clinical trials.',
-      imageUrl: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=1200&q=80',
-      category: 'health',
-      source: { name: 'Medical Journal' },
-      publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-      readTime: 7
-    },
-    {
-      _id: 'trending-5',
-      title: 'Climate Summit Reaches Historic Agreement',
-      description: 'World leaders commit to ambitious carbon reduction targets and renewable energy investments.',
-      imageUrl: 'https://images.unsplash.com/photo-1569163139394-de4798aa62b6?auto=format&fit=crop&w=1200&q=80',
-      category: 'environment',
-      source: { name: 'Global News' },
-      publishedAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
-      readTime: 5
-    },
-    {
-      _id: 'trending-6',
-      title: 'Electric Vehicle Sales Hit Record High',
-      description: 'EV adoption accelerates globally with major automakers expanding production capacity.',
-      imageUrl: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=1200&q=80',
-      category: 'automotive',
-      source: { name: 'Auto World' },
-      publishedAt: new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString(),
-      readTime: 5
-    }
-  ];
-
   useEffect(() => {
     fetchTrendingNews();
   }, [timeFilter, articlesPerPage]);
 
   const fetchTrendingNews = async () => {
     setLoading(true);
+    setError('');
     try {
       const response = await newsAPI.getNews(1, Math.max(articlesPerPage, 12));
       const sortedArticles = (response.data || [])
         .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
         .slice(0, Math.max(articlesPerPage, 12));
-      setArticles(sortedArticles.length > 0 ? sortedArticles : fallbackArticles);
+      setArticles(sortedArticles);
     } catch (error) {
       console.error('Error fetching trending news:', error);
-      setArticles(fallbackArticles);
+      setError('Trending news is temporarily unavailable. Please try again soon.');
+      setArticles([]);
     } finally {
       setLoading(false);
     }
@@ -134,6 +75,12 @@ const Trending = () => {
             ))}
           </div>
         </div>
+
+        {error && (
+          <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl px-4 py-3 mb-8">
+            {error}
+          </div>
+        )}
 
         {/* Featured Top Story */}
         {!loading && articles.length > 0 && (
@@ -178,7 +125,30 @@ const Trending = () => {
         ) : (
           <div className="bg-white rounded-2xl p-12 text-center shadow-lg border border-slate-100">
             <Flame className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-            <p className="text-slate-600 text-lg">No trending articles available</p>
+            <p className="text-slate-600 text-lg mb-2">No trending articles available</p>
+            <p className="text-slate-500 mb-6">Try your personalized feed or explore categories.</p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                to="/dashboard"
+                className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-blue-700 transition"
+              >
+                Open feed
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                to="/categories"
+                className="inline-flex items-center gap-2 border border-slate-200 px-4 py-2 rounded-xl font-semibold text-slate-600 hover:border-slate-300"
+              >
+                Browse categories
+              </Link>
+              <Link
+                to="/reader"
+                className="inline-flex items-center gap-2 text-blue-600 font-semibold"
+              >
+                Reader hub
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
         )}
       </div>

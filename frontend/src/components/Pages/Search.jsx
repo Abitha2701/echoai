@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Search as SearchIcon, TrendingUp, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Search as SearchIcon, TrendingUp, X, ArrowRight } from 'lucide-react';
 import { newsAPI } from '../../services/api';
 import ArticleCard from '../News/ArticleCard';
 import ArticleSkeleton from '../News/ArticleSkeleton';
@@ -11,6 +12,7 @@ const Search = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [error, setError] = useState('');
   const { addToast } = useToast();
   const { preferences } = usePreferences();
   const { articlesPerPage, compactView } = preferences;
@@ -26,75 +28,6 @@ const Search = () => {
     'Biotechnology'
   ];
 
-  const fallbackSearchResults = {
-    'artificial intelligence': [
-      {
-        _id: 'search-ai-1',
-        title: 'New AI Model Achieves Human-Level Understanding',
-        description: 'Researchers develop AI system with breakthrough natural language comprehension capabilities.',
-        imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1200&q=80',
-        category: 'technology',
-        source: { name: 'AI Research' },
-        publishedAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-        readTime: 6
-      },
-      {
-        _id: 'search-ai-2',
-        title: 'AI in Healthcare: Transforming Patient Care',
-        description: 'Machine learning algorithms improve diagnosis accuracy and treatment planning.',
-        imageUrl: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=1200&q=80',
-        category: 'health',
-        source: { name: 'Health Tech' },
-        publishedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-        readTime: 5
-      }
-    ],
-    'climate change': [
-      {
-        _id: 'search-climate-1',
-        title: 'Renewable Energy Adoption Reaches New Milestone',
-        description: 'Global renewable energy capacity surpasses fossil fuels for the first time.',
-        imageUrl: 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=1200&q=80',
-        category: 'environment',
-        source: { name: 'Green Energy' },
-        publishedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-        readTime: 5
-      }
-    ],
-    'space exploration': [
-      {
-        _id: 'search-space-1',
-        title: 'Mars Mission Reveals Stunning New Discoveries',
-        description: 'Latest rover findings provide insights into Mars\' geological history and water presence.',
-        imageUrl: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=80',
-        category: 'science',
-        source: { name: 'Space News' },
-        publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-        readTime: 7
-      }
-    ],
-    'default': [
-      {
-        _id: 'search-default-1',
-        title: 'Tech Industry Sees Major Innovation Wave',
-        description: 'Multiple sectors experience rapid technological advancement and digital transformation.',
-        imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
-        category: 'technology',
-        source: { name: 'Tech Daily' },
-        publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        readTime: 4
-      }
-    ]
-  };
-
-  const getFallbackResults = (searchQuery) => {
-    const normalizedQuery = searchQuery.toLowerCase();
-    const matchedKey = Object.keys(fallbackSearchResults).find(key => 
-      normalizedQuery.includes(key) || key.includes(normalizedQuery)
-    );
-    return fallbackSearchResults[matchedKey] || fallbackSearchResults['default'];
-  };
-
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!query.trim()) {
@@ -104,13 +37,15 @@ const Search = () => {
 
     setLoading(true);
     setHasSearched(true);
+    setError('');
     try {
       const response = await newsAPI.searchNews(query, 1, articlesPerPage);
       const results = response.data || [];
-      setArticles(results.length > 0 ? results : getFallbackResults(query));
+      setArticles(results);
     } catch (error) {
       console.error('Error searching:', error);
-      setArticles(getFallbackResults(query));
+      setError('Search is temporarily unavailable. Please try again soon.');
+      setArticles([]);
     } finally {
       setLoading(false);
     }
@@ -120,14 +55,16 @@ const Search = () => {
     setQuery(topic);
     setLoading(true);
     setHasSearched(true);
+    setError('');
     newsAPI.searchNews(topic, 1, articlesPerPage)
       .then(response => {
         const results = response.data || [];
-        setArticles(results.length > 0 ? results : getFallbackResults(topic));
+        setArticles(results);
       })
       .catch(error => {
         console.error('Error searching:', error);
-        setArticles(getFallbackResults(topic));
+        setError('Search is temporarily unavailable. Please try again soon.');
+        setArticles([]);
       })
       .finally(() => setLoading(false));
   };
@@ -136,6 +73,7 @@ const Search = () => {
     setQuery('');
     setArticles([]);
     setHasSearched(false);
+    setError('');
   };
 
   return (
@@ -219,6 +157,12 @@ const Search = () => {
                 }
               </h2>
             </div>
+
+            {error && (
+              <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl px-4 py-3 mb-6">
+                {error}
+              </div>
+            )}
             
             {articles.length > 0 ? (
               <div className={`grid grid-cols-1 md:grid-cols-2 ${compactView ? 'lg:grid-cols-4 xl:grid-cols-5' : 'lg:grid-cols-3'} gap-6`}>
@@ -230,7 +174,29 @@ const Search = () => {
               <div className="bg-white rounded-2xl p-12 text-center shadow-lg border border-slate-100">
                 <SearchIcon className="h-16 w-16 text-slate-300 mx-auto mb-4" />
                 <p className="text-slate-600 text-lg mb-2">No articles found</p>
-                <p className="text-slate-500">Try searching for different keywords or browse trending topics</p>
+                <p className="text-slate-500 mb-6">Try a different query or jump back into your feed.</p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <Link
+                    to="/dashboard"
+                    className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-blue-700 transition"
+                  >
+                    Open feed
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <Link
+                    to="/categories"
+                    className="inline-flex items-center gap-2 border border-slate-200 px-4 py-2 rounded-xl font-semibold text-slate-600 hover:border-slate-300"
+                  >
+                    Browse categories
+                  </Link>
+                  <Link
+                    to="/reader"
+                    className="inline-flex items-center gap-2 text-blue-600 font-semibold"
+                  >
+                    Reader hub
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
               </div>
             )}
           </>

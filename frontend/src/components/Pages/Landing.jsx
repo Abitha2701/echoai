@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import Footer from '../Layout/Footer';
 import {
   Newspaper,
   Sparkles,
@@ -96,7 +97,7 @@ const Landing = () => {
               Sign In
             </Link>
             <Link
-              to="/register"
+              to="/login"
               className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all hover:-translate-y-[1px]"
             >
               Get Started
@@ -127,7 +128,7 @@ const Landing = () => {
 
             <div className="flex flex-col sm:flex-row items-center gap-4 mb-8">
               <Link
-                to="/register"
+                to="/login"
                 className="group inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-7 py-3 rounded-xl font-semibold text-lg shadow-md focus:ring-2 focus:ring-blue-300 transition-all hover:-translate-y-[2px]"
               >
                 Start Reading Free
@@ -206,7 +207,7 @@ const Landing = () => {
                   <Globe2 className="h-4 w-4 text-sky-600" />
                   Real-time from trusted sources
                 </div>
-                <Link to="/register" className="text-sky-700 font-semibold text-sm hover:text-indigo-600">
+                <Link to="/login" className="text-sky-700 font-semibold text-sm hover:text-indigo-600">
                   View feed
                 </Link>
               </div>
@@ -310,7 +311,7 @@ const Landing = () => {
           </p>
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <Link
-              to="/register"
+              to="/login"
               className="inline-flex items-center gap-2 bg-white text-slate-900 px-6 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all"
             >
               Create Free Account
@@ -321,14 +322,7 @@ const Landing = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="relative z-10 border-t border-slate-200 bg-white/70 backdrop-blur py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-slate-500 text-sm">
-            © 2024 ECHO AI. All rights reserved. | Designed for clarity and speed
-          </p>
-        </div>
-      </div>
+      <Footer variant="marketing" />
     </div>
   );
 };

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { newsAPI } from '../../services/api';
 import ArticleCard from './ArticleCard';
 import ArticleSkeleton from './ArticleSkeleton';
-import { Search, Sparkles, TrendingUp, AlertCircle, Loader } from 'lucide-react';
+import { Search, Sparkles, TrendingUp, AlertCircle, Loader, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { usePreferences } from '../../context/PreferencesContext';
 
 const NewsFeed = () => {
@@ -296,7 +297,22 @@ const NewsFeed = () => {
           <div className="text-center py-20">
             <Sparkles className="h-20 w-20 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-600 text-xl font-bold mb-2">No news articles found</p>
-            <p className="text-gray-500 text-lg">Try adjusting your search or selecting a different category</p>
+            <p className="text-gray-500 text-lg mb-6">Try adjusting your search or selecting a different category.</p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                to="/categories"
+                className="inline-flex items-center gap-2 border border-slate-200 px-4 py-2 rounded-xl font-semibold text-slate-600 hover:border-slate-300"
+              >
+                Browse categories
+              </Link>
+              <Link
+                to="/reader"
+                className="inline-flex items-center gap-2 text-blue-600 font-semibold"
+              >
+                Reader hub
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
         )}
       </div>

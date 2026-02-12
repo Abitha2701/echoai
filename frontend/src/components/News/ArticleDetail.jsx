@@ -47,6 +47,7 @@ Looking ahead, experts predict that AI will continue to advance rapidly, bringin
   };
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     fetchArticle();
   }, [id]);
 
@@ -122,6 +123,44 @@ Looking ahead, experts predict that AI will continue to advance rapidly, bringin
     }
   };
 
+  const buildInsights = (articleData) => {
+    const text = [articleData.title, articleData.description, articleData.content]
+      .filter(Boolean)
+      .join(' ');
+
+    const quoteMatches = Array.from(text.matchAll(/"([^"]{20,200})"/g))
+      .map((match) => match[1].trim())
+      .filter((quote, index, arr) => arr.indexOf(quote) === index)
+      .slice(0, 3);
+
+    const statMatches = Array.from(
+      text.matchAll(/\b\d{1,3}(?:,\d{3})*(?:\.\d+)?%?\b|\b\d{4}\b/g)
+    )
+      .map((match) => match[0])
+      .filter((stat, index, arr) => arr.indexOf(stat) === index)
+      .slice(0, 5);
+
+    const stopWords = new Set([
+      'The', 'A', 'An', 'In', 'On', 'At', 'For', 'And', 'But', 'With', 'From',
+      'This', 'That', 'These', 'Those', 'Its', 'Their', 'His', 'Her', 'Our',
+      'We', 'They', 'He', 'She', 'It', 'I', 'As', 'By', 'To', 'Of'
+    ]);
+
+    const entityMatches = Array.from(
+      text.matchAll(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\b/g)
+    )
+      .map((match) => match[1].trim())
+      .filter((entity) => !stopWords.has(entity))
+      .filter((entity, index, arr) => arr.indexOf(entity) === index)
+      .slice(0, 8);
+
+    return {
+      quotes: quoteMatches,
+      stats: statMatches,
+      entities: entityMatches
+    };
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center transition-colors duration-200">
@@ -163,12 +202,13 @@ Looking ahead, experts predict that AI will continue to advance rapidly, bringin
   };
 
   const categoryColor = categoryColors[article.category?.toLowerCase()] || categoryColors.default;
+  const insights = buildInsights(article);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
       {/* Header with Back Button */}
       <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 shadow-sm transition-colors duration-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center gap-3">
           <Link
             to="/dashboard"
             className="inline-flex items-center space-x-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold transition-all group hover:bg-blue-50 dark:hover:bg-blue-900/30 px-4 py-2 rounded-lg"
@@ -176,15 +216,27 @@ Looking ahead, experts predict that AI will continue to advance rapidly, bringin
             <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
             <span>Back to News</span>
           </Link>
+          <Link
+            to="/reader"
+            className="inline-flex items-center space-x-2 text-slate-600 dark:text-slate-300 hover:text-blue-700 dark:hover:text-blue-300 font-semibold transition-all hover:bg-slate-100 dark:hover:bg-slate-800/60 px-4 py-2 rounded-lg"
+          >
+            <span>Reader Hub</span>
+          </Link>
+          <Link
+            to="/categories"
+            className="inline-flex items-center space-x-2 text-slate-600 dark:text-slate-300 hover:text-blue-700 dark:hover:text-blue-300 font-semibold transition-all hover:bg-slate-100 dark:hover:bg-slate-800/60 px-4 py-2 rounded-lg"
+          >
+            <span>Categories</span>
+          </Link>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fadeInUp">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fadeInUp">
         {/* Article Header */}
-        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden mb-10 border border-gray-100 dark:border-gray-700 transition-colors duration-200">
+        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden mb-6 border border-gray-100 dark:border-gray-700 transition-colors duration-200">
           {/* Featured Image */}
           {article.imageUrl && (
-            <div className="relative h-96 overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300">
+            <div className="relative h-72 md:h-80 overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300">
               <img
                 src={article.imageUrl}
                 alt={article.title}
@@ -197,7 +249,7 @@ Looking ahead, experts predict that AI will continue to advance rapidly, bringin
             </div>
           )}
 
-          <div className="p-6 md:p-10">
+          <div className="p-6 md:p-8">
             {/* Meta Info */}
             <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
               <div className="flex items-center space-x-4">
@@ -255,7 +307,7 @@ Looking ahead, experts predict that AI will continue to advance rapidly, bringin
 
             {/* Read Original Button */}
             {article.url && (
-              <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <a
                   href={article.url}
                   target="_blank"
@@ -270,51 +322,122 @@ Looking ahead, experts predict that AI will continue to advance rapidly, bringin
           </div>
         </div>
 
-        {/* AI Summary Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700 transition-colors duration-200">
-          <div className="p-6 md:p-10">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center space-x-3">
-                <div className="p-3 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-xl shadow-md">
-                  <Sparkles className="h-7 w-7 text-blue-600 dark:text-blue-400 animate-pulse" />
-                </div>
-                <span>AI Summary</span>
-              </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          {/* AI Summary Section */}
+          <div className="lg:col-span-8 bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700 transition-colors duration-200 h-full">
+            <div className="p-6 md:p-8 flex flex-col h-full">
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center space-x-3">
+                  <div className="p-3 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-xl shadow-md">
+                    <Sparkles className="h-6 w-6 text-blue-600 dark:text-blue-400 animate-pulse" />
+                  </div>
+                  <span>AI Summary</span>
+                </h2>
 
-              {!article.aiSummary && isAuthenticated && (
-                <button
-                  onClick={generateSummary}
-                  disabled={generatingSummary}
-                  className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold transform hover:-translate-y-0.5"
-                >
-                  {generatingSummary && <Loader className="h-5 w-5 animate-spin" />}
-                  <span>{generatingSummary ? 'Generating...' : 'Generate Summary'}</span>
-                </button>
-              )}
+                {!article.aiSummary && isAuthenticated && (
+                  <button
+                    onClick={generateSummary}
+                    disabled={generatingSummary}
+                    className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-5 py-2.5 rounded-xl hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold transform hover:-translate-y-0.5"
+                  >
+                    {generatingSummary && <Loader className="h-5 w-5 animate-spin" />}
+                    <span>{generatingSummary ? 'Generating...' : 'Generate Summary'}</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="flex-1">
+                {article.aiSummary ? (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-2xl p-6 shadow-sm h-full">
+                    <p className="text-gray-800 dark:text-gray-200 leading-relaxed text-lg font-medium">
+                      {article.aiSummary}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-center py-12 bg-gray-50 dark:bg-gray-700/50 rounded-2xl h-full flex flex-col items-center justify-center">
+                    <Sparkles className="h-14 w-14 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400 text-base font-semibold max-w-md">
+                      {isAuthenticated
+                        ? 'Click the button above to generate an AI summary of this article.'
+                        : 'Sign in to generate AI summaries of articles.'}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
+          </div>
 
-            {article.aiSummary ? (
-              <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-100 dark:border-blue-800/50 rounded-2xl p-8 shadow-sm">
-                <p className="text-gray-800 dark:text-gray-200 leading-relaxed text-lg font-medium">
-                  {article.aiSummary}
-                </p>
+          {/* Insight Cards */}
+          <div className="lg:col-span-4 bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 transition-colors duration-200 h-full">
+            <div className="p-6 md:p-8 flex flex-col h-full">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Insight Cards</h2>
+                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">Auto-extracted</span>
               </div>
-            ) : (
-              <div className="text-center py-16 bg-gray-50 dark:bg-gray-700/50 rounded-2xl">
-                <Sparkles className="h-16 w-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400 text-lg font-bold">
-                  {isAuthenticated
-                    ? 'Click the button above to generate an AI summary of this article.'
-                    : 'Sign in to generate AI summaries of articles.'}
-                </p>
+
+              <div className="grid grid-cols-1 gap-4 flex-1">
+                <div className="rounded-2xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-5 shadow-sm">
+                  <h3 className="text-base font-bold text-gray-900 dark:text-white mb-3">Key Entities</h3>
+                  {insights.entities.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {insights.entities.map((entity) => (
+                        <span
+                          key={entity}
+                          className="px-3 py-1 rounded-full text-xs font-semibold bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700"
+                        >
+                          {entity}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      No entities detected yet.
+                    </p>
+                  )}
+                </div>
+
+                <div className="rounded-2xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-5 shadow-sm">
+                  <h3 className="text-base font-bold text-gray-900 dark:text-white mb-3">Key Stats</h3>
+                  {insights.stats.length > 0 ? (
+                    <ul className="space-y-2">
+                      {insights.stats.map((stat) => (
+                        <li key={stat} className="flex items-center justify-between">
+                          <span className="text-xs text-gray-500 dark:text-gray-400">Figure</span>
+                          <span className="text-base font-bold text-gray-900 dark:text-white">{stat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      No numbers or statistics found.
+                    </p>
+                  )}
+                </div>
+
+                <div className="rounded-2xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-5 shadow-sm">
+                  <h3 className="text-base font-bold text-gray-900 dark:text-white mb-3">Notable Quotes</h3>
+                  {insights.quotes.length > 0 ? (
+                    <ul className="space-y-3">
+                      {insights.quotes.map((quote) => (
+                        <li key={quote} className="text-sm text-gray-600 dark:text-gray-300 italic">
+                          "{quote}"
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      No quotes detected in the article content.
+                    </p>
+                  )}
+                </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
 
         {/* Full Content */}
         {article.content && (
-          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 md:p-10 mt-10 border border-gray-100 dark:border-gray-700 transition-colors duration-200">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 md:p-8 mt-8 border border-gray-100 dark:border-gray-700 transition-colors duration-200">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Full Article</h2>
             <div className="prose prose-lg max-w-none">
               <p className="text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap text-lg">

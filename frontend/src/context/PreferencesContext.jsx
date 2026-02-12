@@ -12,7 +12,9 @@ const defaultPreferences = {
   autoPlayVideos: false,
   showImages: true,
   compactView: false,
-  language: 'en'
+  language: 'en',
+  onboardingComplete: false,
+  preferredCategories: []
 };
 
 const loadPreferences = () => {

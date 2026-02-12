@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { usePreferences } from '../../context/PreferencesContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { authAPI } from '../../services/api';
 import './AuthSplit.css';
@@ -23,6 +24,7 @@ const Login = () => {
   const [error, setError] = useState('');
 
   const { login, register } = useAuth();
+  const { preferences, setPreferences } = usePreferences();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
@@ -50,8 +52,17 @@ const Login = () => {
       : await register(formData.name, formData.email, formData.password);
 
     if (result.success) {
+      if (mode === 'signup') {
+        setPreferences((prev) => ({
+          ...prev,
+          onboardingComplete: false
+        }));
+      }
+      const nextPath = mode === 'signup'
+        ? '/onboarding'
+        : (preferences.onboardingComplete ? '/reader' : '/onboarding');
       addToast(mode === 'login' ? 'Login successful!' : 'Account created!', 'success');
-      navigate('/dashboard');
+      navigate(nextPath);
     } else {
       const message = result.error || 'Something went wrong. Please try again.';
       setError(message);

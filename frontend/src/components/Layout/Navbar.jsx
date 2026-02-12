@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { Menu, X, User, LogOut, Newspaper, Bookmark, Search, Home, TrendingUp, Layers, Info, FileUp } from 'lucide-react';
+import { Menu, X, User, LogOut, Newspaper, Bookmark, Search, Home, TrendingUp, Layers, Info, LayoutDashboard } from 'lucide-react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,7 +23,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center">
             <Link 
-              to={isAuthenticated ? "/dashboard" : "/login"} 
+              to={isAuthenticated ? "/reader" : "/login"} 
               className="flex items-center space-x-2 hover:opacity-90 transition-all duration-300 group"
             >
               <div className="bg-white rounded-xl p-2 group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
@@ -37,6 +37,13 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-1">
             {isAuthenticated ? (
               <>
+                <Link
+                  to="/reader"
+                  className="flex items-center space-x-1 text-white hover:bg-white/25 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 group"
+                >
+                  <LayoutDashboard className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                  <span>Reader Hub</span>
+                </Link>
                 <Link
                   to="/dashboard"
                   className="flex items-center space-x-1 text-white hover:bg-white/25 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 group"
@@ -64,13 +71,6 @@ const Navbar = () => {
                 >
                   <Search className="h-4 w-4 group-hover:scale-110 transition-transform" />
                   <span>Search</span>
-                </Link>
-                <Link
-                  to="/upload"
-                  className="flex items-center space-x-1 text-white hover:bg-white/25 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 group"
-                >
-                  <FileUp className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                  <span>Upload</span>
                 </Link>
                 <Link
                   to="/saved"
@@ -128,7 +128,7 @@ const Navbar = () => {
                   Sign In
                 </Link>
                 <Link
-                  to="/register"
+                  to="/login"
                     className="bg-white/20 hover:bg-white/30 text-white px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 border border-white/40 hover:border-white/60"
                 >
                   Sign Up
@@ -155,6 +155,14 @@ const Navbar = () => {
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {isAuthenticated ? (
               <>
+                <Link
+                  to="/reader"
+                  onClick={closeMenu}
+                  className="flex items-center space-x-2 text-white hover:bg-blue-600 block px-3 py-2 rounded-xl text-base font-medium transition-all duration-200"
+                >
+                  <LayoutDashboard className="h-5 w-5" />
+                  <span>Reader Hub</span>
+                </Link>
                 <Link
                   to="/dashboard"
                   onClick={closeMenu}
@@ -186,14 +194,6 @@ const Navbar = () => {
                 >
                   <Search className="h-5 w-5" />
                   <span>Search</span>
-                </Link>
-                <Link
-                  to="/upload"
-                  onClick={closeMenu}
-                  className="flex items-center space-x-2 text-white hover:bg-blue-600 block px-3 py-2 rounded-xl text-base font-medium transition-all duration-200"
-                >
-                  <FileUp className="h-5 w-5" />
-                  <span>Upload</span>
                 </Link>
                 <Link
                   to="/saved"
@@ -244,7 +244,7 @@ const Navbar = () => {
                   Sign In
                 </Link>
                 <Link
-                  to="/register"
+                  to="/login"
                   onClick={closeMenu}
                   className="block px-3 py-2 rounded-xl text-base font-medium bg-white/20 text-white hover:bg-white/30 transition-all duration-200"
                 >
